@@ -1,47 +1,32 @@
-import React, { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
+import  { useState, useEffect, useContext } from 'react';
+import axiosInstance from '../api/axios'; // Import the Axios instance
 import { AuthContext } from '../context/AuthContext';
 
 const Goals = () => {
   const [goals, setGoals] = useState([]);
   const [text, setText] = useState('');
-  const { user, logout } = useContext(AuthContext);
+  const { token, logout } = useContext(AuthContext);
 
   useEffect(() => {
     const fetchGoals = async () => {
-      const config = {
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-        },
-      };
-      const response = await axios.get('/api/goals', config);
+      const response = await axiosInstance.get('/api/goals');
       setGoals(response.data);
     };
 
-    if (user) {
+    if (token) {
       fetchGoals();
     }
-  }, [user]);
+  }, [token]);
 
   const addGoal = async (e) => {
     e.preventDefault();
-    const config = {
-      headers: {
-        Authorization: `Bearer ${user.token}`,
-      },
-    };
-    const response = await axios.post('/api/goals', { text }, config);
+    const response = await axiosInstance.post('/api/goals', { text });
     setGoals([...goals, response.data]);
     setText('');
   };
 
   const deleteGoal = async (id) => {
-    const config = {
-      headers: {
-        Authorization: `Bearer ${user.token}`,
-      },
-    };
-    await axios.delete(`/api/goals/${id}`, config);
+    await axiosInstance.delete(`/api/goals/${id}`);
     setGoals(goals.filter((goal) => goal._id !== id));
   };
 

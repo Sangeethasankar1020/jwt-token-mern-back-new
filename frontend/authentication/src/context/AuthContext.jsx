@@ -1,43 +1,53 @@
-// src/context/AuthContext.jsx
 import { createContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import axiosInstance from '../api/axios';
 import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext();
 
 const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const loggedUser = JSON.parse(localStorage.getItem('user'));
-    if (loggedUser) {
-      setUser(loggedUser);
+    const storedToken = localStorage.getItem('token');
+    if (storedToken) {
+      setToken(storedToken);
     }
   }, []);
 
   const register = async (userData) => {
-    const response = await axios.post('/api/users', userData);
-    setUser(response.data);
-    localStorage.setItem('user', JSON.stringify(response.data));
+  try {
+    const response = await axiosInstance.post('/api/users', userData);
+    console.log('Registration response:', response); // Log the whole response
+    setToken(response.data.token);
+    localStorage.setItem('token', response.data.token);
     navigate('/goals');
-  };
+  } catch (error) {
+    console.error('Registration error:', error.message); // Log error message
+  }
+};
+
 
   const login = async (userData) => {
-    const response = await axios.post('/api/users/login', userData);
-    setUser(response.data);
-    localStorage.setItem('user', JSON.stringify(response.data));
-    navigate('/goals');
+    try {
+      const response = await axiosInstance.post('/api/users/login', userData);
+      console.log('Login response:', response.data); // Debug log
+      setToken(response.data.token);
+      localStorage.setItem('token', response.data.token);
+      navigate('/goals');
+    } catch (error) {
+      console.error('Login error:', error);
+    }
   };
 
   const logout = () => {
-    setUser(null);
-    localStorage.removeItem('user');
+    setToken(null);
+    localStorage.removeItem('token');
     navigate('/login');
   };
 
   return (
-    <AuthContext.Provider value={{ user, register, login, logout }}>
+    <AuthContext.Provider value={{ token, register, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

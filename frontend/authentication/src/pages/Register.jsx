@@ -1,4 +1,5 @@
-import React, { useState, useContext } from 'react';
+// src/pages/Register.jsx
+import  { useState, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 
 const Register = () => {
